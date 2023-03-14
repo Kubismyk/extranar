@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>17813023923-msunl10qat189cjtq8fbmsoe62qkj2eg.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.17813023923-msunl10qat189cjtq8fbmsoe62qkj2eg</string>
+	<key>API_KEY</key>
+	<string>AIzaSyClephst7tTQvpBnZYto4d0cq8Sc6W8gO8</string>
+	<key>GCM_SENDER_ID</key>
+	<string>17813023923</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>-.extranar</string>
+	<key>PROJECT_ID</key>
+	<string>extranar-902f7</string>
+	<key>STORAGE_BUCKET</key>
+	<string>extranar-902f7.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:17813023923:ios:65f595055138094993d4c6</string>
+	<key>DATABASE_URL</key>
+	<string>https://extranar-902f7-default-rtdb.europe-west1.firebasedatabase.app</string>
+</dict>
+</plist>

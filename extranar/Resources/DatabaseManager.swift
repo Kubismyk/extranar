@@ -11,6 +11,7 @@ import FirebaseDatabase
 struct User{
     let username:String
     let emailAdress:String
+    let uniqeID:String
     var profilePictureURL:String
     
     var safeEmail:String {
@@ -60,7 +61,8 @@ extension DatabaseManager {
     public func insertUser(with user:User, completion: @escaping (Bool) -> Void){
         database.child(user.safeEmail).setValue([
             "username":user.username,
-            "pfp":user.profilePictureURL
+            "pfp":user.profilePictureURL,
+            "uniqeID":user.uniqeID
         ]) { error, _ in
             guard error == nil else {
                 print("failed to write data")
@@ -71,7 +73,8 @@ extension DatabaseManager {
                 if var usersCollection = snapshot.value as? [[String:String]] {
                     let newElement = [
                         "name":user.username,
-                        "mail":user.safeEmail
+                        "mail":user.safeEmail,
+                        "uniqeID":user.uniqeID
                     ]
                     usersCollection.append(newElement)
                     self.database.child("users").setValue(usersCollection) { error, _ in
@@ -84,7 +87,8 @@ extension DatabaseManager {
                     let newCollection: [[String:String]] = [
                         [
                             "name":user.username,
-                            "mail":user.safeEmail
+                            "mail":user.safeEmail,
+                            "uniqeID":user.uniqeID
                         ]
                     ]
                     self.database.child("users").setValue(newCollection) { error, _ in
@@ -96,6 +100,23 @@ extension DatabaseManager {
                 }
             }
             completion(true)
+        }
+    }
+    
+    func getUserData(with email:String,completion: @escaping(Result<User, Error>) -> Void){
+        database.child(email).observeSingleEvent(of: .value) { snapshot in
+            guard let data = snapshot.value as? [String: Any],
+                  let uniqueID = data["uniqeID"] as? String,
+                  let username = data["username"] as? String,
+                  let pfp = data["pfp"] as? String
+            else {
+                print("Error fetching unique ID for email: \(email)")
+                return
+            }
+            // Do something with the unique ID
+            var userData = User(username: username, emailAdress: "", uniqeID: uniqueID, profilePictureURL: "")
+            print("Unique ID for email \(email) is: \(uniqueID),username:\(username),pfp:\(pfp)")
+            completion(.success(userData))
         }
     }
 }

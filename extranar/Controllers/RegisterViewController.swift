@@ -24,8 +24,16 @@ class RegisterViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        errorLabel.alpha = 1
 
         // Do any additional setup after loading the view.
+    }
+    
+    func generateRandomString() -> String {
+        let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        let randomString = String((0..<5).map{ _ in letters.randomElement()! })
+        let randomNumber = Int.random(in: 0...9)
+        return randomString + String(randomNumber)
     }
     
     
@@ -34,8 +42,8 @@ class RegisterViewController: UIViewController {
         var password = passwordField.text!
         var email = emailField.text!
         var repeatPassword = repeatPasswordField.text!
-        
-        
+        let uniqeID = generateRandomString()
+         
         if password != repeatPassword {
             password = ""
             passwordField.attributedPlaceholder = NSAttributedString(
@@ -91,23 +99,23 @@ class RegisterViewController: UIViewController {
                         return
                     }
                     
-//                    DispatchQueue.main.async {
-//                        self!.spinner.dismiss()
-//                    }
+                    DispatchQueue.main.async {
+                        self!.spinner.dismiss()
+                    }
                     
                     guard let result = authResult, error == nil else {
                         self?.errorLabel.text = "error creating user"
                         return
                     }
                     let user = result.user
-                    DatabaseManager.shared.insertUser(with: User(username: username, emailAdress: email, profilePictureURL: "")) { success in
+                    DatabaseManager.shared.insertUser(with: User(username: username, emailAdress: email,uniqeID: uniqeID, profilePictureURL: "")) { success in
                         if success {
                             return
                         }
                     }
                     
                     print("user created \(user)")
-                    //strongSelf.dismiss(animated: true)
+                    strongSelf.dismiss(animated: true)
                     
                 }
             }

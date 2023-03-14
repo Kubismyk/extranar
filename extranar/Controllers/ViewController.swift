@@ -47,7 +47,7 @@ class ViewController: UIViewController {
             
             print("user: \(user) logged succesfully")
 
-            //strongSelf.dismiss(animated: true)
+            strongSelf.dismiss(animated: true)
         })
     }
 

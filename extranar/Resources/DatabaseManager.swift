@@ -154,28 +154,41 @@ extension DatabaseManager {
             }
         })
     }
-    func loadRoom(with userTag:String,otherUserTag:String,completion:@escaping(Bool) -> Void){
-        let roomRef = database.child("rooms/\(userTag)-\(otherUserTag)")
-        let roomRef2 = database.child("rooms/\(otherUserTag)-\(userTag)")
-        // sxvanairad weria tavidan bolomde, contains unda gavaket user userTagze
-        roomRef.observeSingleEvent(of: .value, with: { [weak self] snapshot in
-            if snapshot.exists() {
-                // Room already exists
-                print("room already exists")
-                completion(true)
-            } else{
-                completion(false)
+    func loadRoom(with tag: String, completion: @escaping (Bool, String?) -> Void) {
+        let ref = Database.database().reference(withPath: "rooms")
+
+        ref.observeSingleEvent(of: .value) { (snapshot) in
+            if let rooms = snapshot.value as? [String: [String: String]] {
+                for (key, room) in rooms {
+                    if key.contains(tag) {
+                        let otherUserTag = room["otherUserTag"] ?? ""
+                        let userTag = room["userTag"] ?? ""
+                        let partnerTag = otherUserTag == tag ? userTag : otherUserTag
+                        completion(true, partnerTag)
+                        return
+                    }
+                }
             }
-    })
-        roomRef2.observeSingleEvent(of: .value, with: { [weak self] snapshot in
-            if snapshot.exists() {
-                // Room already exists
-                print("room already exists")
-                completion(true)
-            } else{
-                completion(false)
-            }
-    })
+            completion(false, nil)
+        }
     }
+    
+    func searchUserWithID(with id: String, completion: @escaping (String?) -> Void) {
+        let ref = Database.database().reference(withPath: "users")
+
+        ref.observeSingleEvent(of: .value) { (snapshot) in
+            if let users = snapshot.value as? [[String: String]] {
+                for user in users {
+                    if let userUniqueId = user["uniqeID"], userUniqueId == id {
+                        completion(user["name"])
+                        return
+                    }
+                }
+            }
+            completion(nil)
+        }
+    }
+
+
 }
 

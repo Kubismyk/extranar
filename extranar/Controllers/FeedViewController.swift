@@ -20,12 +20,19 @@ class FeedViewController: UIViewController {
     
     var userDefaults = UserDefaults.standard
     
+    var partnerName:String = "" {
+        didSet {
+            self.title = partnerName
+        }
+    }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(false)
         validateAuth()
         getUser()
         designNConstraints()
+        
+        
         self.title = "you don't have loved one yet"
         print("current user:\(String(describing: FirebaseAuth.Auth.auth().currentUser))")
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal"), landscapeImagePhone: UIImage(systemName: "line.3.horizontal"), style: .done, target: self, action: #selector(openMenu))
@@ -41,7 +48,16 @@ class FeedViewController: UIViewController {
     }
     
     func loadData(){
-        DatabaseManager.shared.loadRoom(with: userUniqueID, otherUserTag: <#T##String#>, completion: <#T##(Bool) -> Void#>)
+        DatabaseManager.shared.loadRoom(with: userUniqueID) { success, otherUserTag in
+            if success{
+                print("users partner id: \(otherUserTag!)")
+                DatabaseManager.shared.searchUserWithID(with: otherUserTag ?? "not foud") { partnerName in
+                    self.partnerName = partnerName ?? "nil"
+                }
+            } else {
+                print("failed to find room")
+            }
+        }
     }
     
     private func getUser(){
@@ -63,6 +79,8 @@ class FeedViewController: UIViewController {
         let menuBefore = MenuViewController()
         let menu = SideMenuNavigationController(rootViewController:menuBefore)
         menu.leftSide = true
+        print(userUniqueID)
+        loadData()
         present(menu, animated: true, completion: nil)
         
     }

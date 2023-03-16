@@ -26,7 +26,6 @@ class RegisterViewController: UIViewController {
         super.viewDidLoad()
         errorLabel.alpha = 1
 
-        // Do any additional setup after loading the view.
     }
     
     func generateRandomString() -> String {

@@ -9,33 +9,40 @@ import UIKit
 import FirebaseAuth
 import SideMenu
 
-protocol FeedViewControllerDelegate:class {
-    func myVCDidFinish(_ controller: FeedViewControllerDelegate, text: String)
-}
 
-
-class FeedViewController: UIViewController, UINavigationControllerDelegate {
-    weak var delegate: FeedViewControllerDelegate?
-    
-    
+class FeedViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
     }
+    
+    var isInRoom:Bool = false
+    
+    var userDefaults = UserDefaults.standard
+    
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(false)
         validateAuth()
         getUser()
-        print("current user:\(FirebaseAuth.Auth.auth().currentUser)")
+        designNConstraints()
+        self.title = "you don't have loved one yet"
+        print("current user:\(String(describing: FirebaseAuth.Auth.auth().currentUser))")
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal"), landscapeImagePhone: UIImage(systemName: "line.3.horizontal"), style: .done, target: self, action: #selector(openMenu))
     }
     
-    // delegate
     
     
-    // end of delegate
     
-    var userUniqueID = String()
+    var userUniqueID = String() {
+        didSet {
+            userDefaults.setValue(userUniqueID, forKey: "uniqueID")
+        }
+    }
+    
+    func loadData(){
+        DatabaseManager.shared.loadRoom(with: userUniqueID, otherUserTag: <#T##String#>, completion: <#T##(Bool) -> Void#>)
+    }
     
     private func getUser(){
         let email = UserDefaults.standard.string(forKey: "email")
@@ -43,7 +50,7 @@ class FeedViewController: UIViewController, UINavigationControllerDelegate {
         DatabaseManager.shared.getUserData(with: safeEmail) { [weak self] result in
             switch result{
             case .success(let user):
-                print(user)
+                print(user.uniqeID)
                 self?.userUniqueID = user.uniqeID
             case .failure(let error):
                 print("error1\(error)")
@@ -51,11 +58,11 @@ class FeedViewController: UIViewController, UINavigationControllerDelegate {
         }
     }
     
+    // if menu unqiue id is nil restart app
     @objc func openMenu(){
         let menuBefore = MenuViewController()
         let menu = SideMenuNavigationController(rootViewController:menuBefore)
         menu.leftSide = true
-        menu.delegate = self
         present(menu, animated: true, completion: nil)
         
     }
@@ -103,6 +110,68 @@ class FeedViewController: UIViewController, UINavigationControllerDelegate {
     @IBAction func logOutButton(_ sender: Any) {
         logOutAlert()
     }
+    
+    @objc func createRoomButtonClick(){
+        let alertController = UIAlertController(title: "Enter text", message: nil, preferredStyle: .alert)
+        
+        alertController.addTextField { (textField) in
+            textField.placeholder = "Enter text here"
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alertController.addAction(cancelAction)
+        
+        let okAction = UIAlertAction(title: "OK", style: .default) { (action) in
+            if let textField = alertController.textFields?.first, let text = textField.text {
+                print("Entered text: \(text)")
+                DatabaseManager.shared.createRoom(with: self.userUniqueID, otherUserTag: text) { success in
+                    if success {
+                        print("room created succesfully")
+                    }
+                }
+            }
+        }
+        alertController.addAction(okAction)
+        
+        present(alertController, animated: true, completion: nil)
+        }
+    
+    
+    func designNConstraints(){
+        let createRoom = UIButton(frame: CGRect(x: 20, y: 0, width: 70, height: 40))
+        createRoom.setTitle("Button", for: .normal)
+        createRoom.backgroundColor = .blue
+        createRoom.layer.cornerRadius = 5
+        createRoom.layer.masksToBounds = true
+        createRoom.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        createRoom.setTitleColor(.white, for: .normal)
+        createRoom.setTitleColor(.gray, for: .highlighted)
+        createRoom.titleLabel?.adjustsFontSizeToFitWidth = true
+        createRoom.titleLabel?.minimumScaleFactor = 0.5
+        createRoom.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin, .flexibleBottomMargin]
+        createRoom.frame.origin.y = UIScreen.main.bounds.height - 30 - createRoom.frame.size.height
+
+        view.addSubview(createRoom)
+        
+        createRoom.addTarget(self, action: #selector(createRoomButtonClick), for: .touchUpInside)
+        
+        
+        let imageView = UIImageView(image: UIImage(named: "main-hearth"))
+        imageView.contentMode = .center // set the content mode to center
+        imageView.translatesAutoresizingMaskIntoConstraints = false // disable the default autoresizing mask
+
+        // add the image view as a subview of your view
+        view.addSubview(imageView)
+
+        // add constraints to center the image view within your view
+        NSLayoutConstraint.activate([
+            imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            imageView.widthAnchor.constraint(equalToConstant: imageView.image!.size.width),
+            imageView.heightAnchor.constraint(equalToConstant: imageView.image!.size.height)
+        ])
+    }
+    
 }
 
 

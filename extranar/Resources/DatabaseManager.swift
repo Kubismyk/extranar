@@ -119,4 +119,63 @@ extension DatabaseManager {
             completion(.success(userData))
         }
     }
+    func createRoom(with userTag:String, otherUserTag:String, completion: @escaping (Bool) -> Void){
+        let roomRef = database.child("rooms/\(userTag)-\(otherUserTag)")
+        roomRef.observeSingleEvent(of: .value, with: { [weak self] snapshot in
+            if snapshot.exists() {
+                // Room already exists
+                print("room already exists")
+                completion(false)
+            } else {
+                // Room doesn't exist, check if otherUserTag exists in "users" node
+                let usersRef = self!.database.child("users")
+                usersRef.queryOrdered(byChild: "uniqeID").queryEqual(toValue: otherUserTag).observeSingleEvent(of: .value, with: { snapshot in
+                    if snapshot.exists() {
+                        // otherUserTag exists, create the room
+                        print("other users tag is found, creating room")
+                        roomRef.setValue([
+                            "userTag": userTag,
+                            "otherUserTag": otherUserTag
+                        ]) { error, _ in
+                            if let error = error {
+                                print("Failed to write data: \(error.localizedDescription)")
+                                completion(false)
+                            } else {
+                                // Room created successfully
+                                completion(true)
+                            }
+                        }
+                    } else {
+                        // otherUserTag doesn't exist, return false
+                        print("tag doesn't exsits")
+                        completion(false)
+                    }
+                })
+            }
+        })
+    }
+    func loadRoom(with userTag:String,otherUserTag:String,completion:@escaping(Bool) -> Void){
+        let roomRef = database.child("rooms/\(userTag)-\(otherUserTag)")
+        let roomRef2 = database.child("rooms/\(otherUserTag)-\(userTag)")
+        // sxvanairad weria tavidan bolomde, contains unda gavaket user userTagze
+        roomRef.observeSingleEvent(of: .value, with: { [weak self] snapshot in
+            if snapshot.exists() {
+                // Room already exists
+                print("room already exists")
+                completion(true)
+            } else{
+                completion(false)
+            }
+    })
+        roomRef2.observeSingleEvent(of: .value, with: { [weak self] snapshot in
+            if snapshot.exists() {
+                // Room already exists
+                print("room already exists")
+                completion(true)
+            } else{
+                completion(false)
+            }
+    })
+    }
 }
+
